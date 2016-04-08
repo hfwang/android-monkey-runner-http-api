@@ -33,6 +33,28 @@ class Root(object):
         return "Hello World!"
 
     @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def broadcastIntent(self):
+        request = cherrypy.request.json
+        args = {}
+        for k in START_ACTIVITY_KEYS:
+            if k in request:
+                args[k] = request[k]
+        kind = self.key_event_type(request.get("type"))
+        device.broadcastIntent(**args)
+        return "OK"
+
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def drag(self):
+        request = cherrypy.request.json
+        device.drag((request["start"]["x"], request["start"]["y"]),
+                    (request["end"]["x"], request["end"]["y"]),
+                    request.get("duration", 1.0),
+                    request.get("steps", 10))
+        return "OK"
+
+    @cherrypy.expose
     @cherrypy.tools.json_in(force=False)
     def getProperty(self, prop=None):
         if prop is None:
@@ -69,9 +91,8 @@ class Root(object):
     @cherrypy.expose
     def screenshot(self):
         cherrypy.response.headers['Content-Type'] = 'image/png'
-        # Cast Java array.array to string
-        # device.takeSnapshot().writeToFile("/Users/darkwulf/Code/monkey-runner-api/screenshot.png")
-        # return open("screenshot.png")
+        # Need to call tostring to convert from Java array to something
+        # descending from basestring (so cherrypy knows what to do)
         return device.takeSnapshot().convertToBytes("png").tostring()
 
     @cherrypy.expose
