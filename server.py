@@ -86,11 +86,26 @@ class Root(object):
         return "OK"
 
     @cherrypy.expose
-    def screenshot(self):
+    @cherrypy.tools.json_in(force=False)
+    def screenshot(self, x=None, y=None, h=None, w=None):
+        snapshot = device.takeSnapshot()
+
+        request = {}
+        if hasattr(cherrypy.request, "json"):
+            request = cherrypy.request.json
+
+        x = x or request.get("x")
+        y = y or request.get("y")
+        w = w or request.get("w")
+        h = h or request.get("h")
+
+        if x is not None and y is not None and h is not None and w is not None:
+            snapshot = snapshot.getSubImage((int(x), int(y), int(h), int(w)))
+
         cherrypy.response.headers['Content-Type'] = 'image/png'
         # Need to call tostring to convert from Java array to something
         # descending from basestring (so cherrypy knows what to do)
-        return device.takeSnapshot().convertToBytes("png").tostring()
+        return snapshot.convertToBytes("png").tostring()
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
