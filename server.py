@@ -1,9 +1,6 @@
-import sys
-sys.path.append('lib')
-
-import socket
-socket.IPPROTO_TCP = 6
-
+# Import twiddle_env to set up system path and tweak socket protocol
+import twiddle_env
+import pprint
 import cherrypy
 
 # Imports the monkeyrunner modules used by this program
