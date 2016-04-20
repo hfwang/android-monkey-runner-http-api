@@ -33,10 +33,8 @@ class Root(object):
     @cherrypy.tools.json_in()
     def broadcastIntent(self):
         request = cherrypy.request.json
-        args = {}
-        for k in START_ACTIVITY_KEYS:
-            if k in request:
-                args[k] = request[k]
+        args = dict(
+            (k, request[k]) for k in START_ACTIVITY_KEYS if k in request)
         kind = self.key_event_type(request.get("type"))
         device.broadcastIntent(**args)
         return "OK"
@@ -77,10 +75,8 @@ class Root(object):
     @cherrypy.tools.json_in()
     def startActivity(self):
         request = cherrypy.request.json
-        args = {}
-        for k in START_ACTIVITY_KEYS:
-            if k in request:
-                args[k] = request[k]
+        args = dict(
+            (k, request[k]) for k in START_ACTIVITY_KEYS if k in request)
         kind = self.key_event_type(request.get("type"))
         device.startActivity(**args)
         return "OK"
